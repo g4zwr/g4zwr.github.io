@@ -79,6 +79,83 @@ local TS = srv.TweenService
 local AES = srv.AvatarEditorService
 local HS = srv.HttpService
 
+local ldG = Instance.new("ScreenGui")
+ldG.Name = "GazeLoadingGUI"
+ldG.DisplayOrder = 1000
+ldG.ResetOnSpawn = false
+ldG.IgnoreGuiInset = true
+ldG.ScreenInsets = Enum.ScreenInsets.None
+ldG.Parent = srv.CoreGui
+
+local ldF = Instance.new("Frame")
+ldF.Size = UDim2.new(0, scl("X", 300), 0, scl("Y", 110))
+ldF.AnchorPoint = Vector2.new(0.5, 0.5)
+ldF.Position = UDim2.new(0.5, 0, 0.5, 0)
+ldF.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+ldF.BackgroundTransparency = 0.1
+ldF.Parent = ldG
+do
+    local c = Instance.new("UICorner", ldF); c.CornerRadius = UDim.new(0, 8)
+    local st = Instance.new("UIStroke", ldF); st.Color = Color3.fromRGB(90, 90, 90); st.Thickness = 1.5
+end
+
+local ldT = Instance.new("TextLabel")
+ldT.Size = UDim2.new(1, 0, 0, scl("Y", 30))
+ldT.Position = UDim2.new(0, 0, 0, scl("Y", 8))
+ldT.BackgroundTransparency = 1
+ldT.Text = "Gaze Emotes"
+ldT.TextColor3 = Color3.new(1, 1, 1)
+ldT.Font = Enum.Font.GothamBold
+ldT.TextScaled = true
+ldT.Parent = ldF
+
+local ldS = Instance.new("TextLabel")
+ldS.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 20))
+ldS.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 42))
+ldS.BackgroundTransparency = 1
+ldS.Text = "Starting..."
+ldS.TextColor3 = Color3.fromRGB(200, 200, 200)
+ldS.Font = Enum.Font.Gotham
+ldS.TextScaled = true
+ldS.Parent = ldF
+
+local ldB = Instance.new("Frame")
+ldB.Size = UDim2.new(1, -scl("X", 40), 0, scl("Y", 14))
+ldB.Position = UDim2.new(0, scl("X", 20), 0, scl("Y", 70))
+ldB.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ldB.Parent = ldF
+do
+    local c = Instance.new("UICorner", ldB); c.CornerRadius = UDim.new(0, 7)
+end
+
+local ldFill = Instance.new("Frame")
+ldFill.Size = UDim2.new(0, 0, 1, 0)
+ldFill.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+ldFill.Parent = ldB
+do
+    local c = Instance.new("UICorner", ldFill); c.CornerRadius = UDim.new(0, 7)
+end
+
+local ldPct = Instance.new("TextLabel")
+ldPct.Size = UDim2.new(1, 0, 0, scl("Y", 16))
+ldPct.Position = UDim2.new(0, 0, 0, scl("Y", 88))
+ldPct.BackgroundTransparency = 1
+ldPct.Text = "0%"
+ldPct.TextColor3 = Color3.new(1, 1, 1)
+ldPct.Font = Enum.Font.GothamBold
+ldPct.TextScaled = true
+ldPct.Parent = ldF
+
+local LOAD_TOTAL = 12
+local ldN = 0
+local function loadStep(txt)
+    ldN = math.min(ldN + 1, LOAD_TOTAL)
+    ldFill.Size = UDim2.new(ldN / LOAD_TOTAL, 0, 1, 0)
+    ldPct.Text = math.floor(ldN / LOAD_TOTAL * 100) .. "%"
+    ldS.Text = txt
+    RS.RenderStepped:Wait()
+end
+
 local lP = Plrs.LocalPlayer
 local chr = lP.Character or lP.CharacterAdded:Wait()
 local hum = chr:WaitForChild("Humanoid")
@@ -128,19 +205,23 @@ local function lEmt()
         if e.Favorite == nil then e.Favorite = false; u = true end
         if not e.Price then e.Price = 0; u = true end
         if not e.Idx then e.Idx = i; u = true end
+        if e.Creator == nil then e.Creator = ""; u = true end
     end
     if u then svEmt() end
 end
 
 lEmt()
+loadStep("Loading saved emotes")
 
 local cTr = nil
 
 local function plEmt(aId)
     if cTr then cTr:Stop(cfg["Fade Out"]) end
+    local rid = gRId(aId) or aId
     local an = Instance.new("Animation")
-    an.AnimationId = "rbxassetid://" .. gRId(aId)
-    local tr = hum:LoadAnimation(an)
+    an.AnimationId = "rbxassetid://" .. tostring(rid)
+    local animator = hum:FindFirstChildOfClass("Animator") or hum
+    local tr = animator:LoadAnimation(an)
     local pr = cfg["High Priority"] and Enum.AnimationPriority.Action4 or Enum.AnimationPriority.Action
     tr.Priority = pr
     local wt = cfg["Weight"] == 0 and 0.001 or cfg["Weight"]
@@ -203,13 +284,13 @@ local function mkPr(cd, pr)
     pL.Font = Enum.Font.GothamBold
     pL.TextScaled = true
     pL.ZIndex = 2
-    pL.Text = (pr and tonumber(pr) and tonumber(pr) > 0) and "R$"..tostring(pr) or "Free"
+    pL.Text = (pr and tonumber(pr) and tonumber(pr) > 0) and (utf8.char(0xE002) .. tostring(pr)) or "Free"
     mkCr(pL, 6)
 end
 
 local mF = Instance.new("Frame")
-mF.Size = UDim2.new(0, scl("X", 470), 0, scl("Y", 450))
-mF.Position = UDim2.new(0.5, -scl("X", 325), 0.5, -scl("Y", 225))
+mF.Size = UDim2.new(0, scl("X", 452), 0, scl("Y", 350))
+mF.Position = UDim2.new(0.7, -scl("X", 325), 0.5, -scl("Y", 225))
 mF.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 mF.BackgroundTransparency = 0.15
 mF.Active = true
@@ -297,6 +378,46 @@ dv.Position = UDim2.new(0.6, -scl("X", 1), 0, scl("Y", 70))
 dv.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 dv.BackgroundTransparency = 0.5
 dv.Parent = mF
+loadStep("Building main window")
+
+local rSvd, pSr
+
+local sT = {
+    {Enum.CatalogSortType.Relevance, "Relevance"},
+    {Enum.CatalogSortType.PriceHighToLow, "Price H→L"},
+    {Enum.CatalogSortType.PriceLowToHigh, "Price L→H"},
+    {Enum.CatalogSortType.MostFavorited, "Most Fav"},
+    {Enum.CatalogSortType.RecentlyCreated, "Recent"},
+    {Enum.CatalogSortType.Bestselling, "Bestsell"}
+}
+local cSI = 1
+local cSQ = ""
+local cPC = nil
+local cPN = 1
+local cTId = 1
+
+local salesList = Enum.SalesTypeFilter:GetEnumItems()
+local catList = Enum.CatalogCategoryFilter:GetEnumItems()
+local function idxOf(list, item)
+    for i, v in ipairs(list) do if v == item then return i end end
+    return 1
+end
+local c_Sales = idxOf(salesList, Enum.SalesTypeFilter.All)
+local c_Cat = idxOf(catList, Enum.CatalogCategoryFilter.None)
+local c_Off = true
+local c_Creator = ""
+local c_MaxPrice = -1
+local c_MinPrice = -1
+
+local sSrtI = 1
+local sSrtA = {"Newest", "Oldest", "A-Z", "Z-A", "Price H-L", "Price L-H"}
+local sPN = 1
+local sRId = 0
+local sMxP = 1
+local f_FavOnly = false
+local f_MaxPrice = -1
+local f_MinPrice = -1
+local f_Creator = ""
 
 local cFm = Instance.new("Frame")
 cFRef = cFm
@@ -307,7 +428,7 @@ cFm.Visible = true
 cFm.Parent = mF
 
 local sBx = Instance.new("TextBox")
-sBx.Size = UDim2.new(0.6, -scl("X", 8), 0, scl("Y", 28))
+sBx.Size = UDim2.new(0.5, -scl("X", 8), 0, scl("Y", 28))
 sBx.Position = UDim2.new(0, scl("X", 8), 0, 0)
 sBx.PlaceholderText = "Search..."
 sBx.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -321,31 +442,32 @@ sBx.Parent = cFm
 mkCr(sBx, 4)
 mkSt(sBx, Color3.fromRGB(80, 80, 80), 1)
 
+local cFltB = Instance.new("TextButton")
+cFltB.Size = UDim2.new(0.38, -scl("X", 8), 0, scl("Y", 28))
+cFltB.Position = UDim2.new(0.5, scl("X", 4), 0, 0)
+cFltB.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+cFltB.BackgroundTransparency = 0.2
+cFltB.Text = "Filter"
+cFltB.Font = Enum.Font.GothamBold
+cFltB.TextScaled = true
+cFltB.TextColor3 = Color3.new(1, 1, 1)
+cFltB.Parent = cFm
+mkCr(cFltB, 4)
+mkSt(cFltB, Color3.fromRGB(90, 90, 90), 1)
+
 local rfB = Instance.new("TextButton")
-rfB.Size = UDim2.new(0.2, -scl("X", 4), 0, scl("Y", 28))
-rfB.Position = UDim2.new(0.6, scl("X", 4), 0, 0)
+rfB.Size = UDim2.new(0.1, -scl("X", 4), 0, scl("Y", 28))
+rfB.Position = UDim2.new(0.9, scl("X", 4), 0, 0)
 rfB.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 rfB.BackgroundTransparency = 0.2
-rfB.Text = "Refresh"
+rfB.Text = "↻"
 rfB.Font = Enum.Font.GothamBold
 rfB.TextScaled = true
 rfB.TextColor3 = Color3.new(1, 1, 1)
 rfB.Parent = cFm
 mkCr(rfB, 4)
 mkSt(rfB, Color3.fromRGB(90, 90, 90), 1)
-
-local srtB = Instance.new("TextButton")
-srtB.Size = UDim2.new(0.2, -scl("X", 8), 0, scl("Y", 28))
-srtB.Position = UDim2.new(0.8, scl("X", 4), 0, 0)
-srtB.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-srtB.BackgroundTransparency = 0.2
-srtB.Text = "Sort: Rel"
-srtB.Font = Enum.Font.GothamBold
-srtB.TextScaled = true
-srtB.TextColor3 = Color3.new(1, 1, 1)
-srtB.Parent = cFm
-mkCr(srtB, 4)
-mkSt(srtB, Color3.fromRGB(90, 90, 90), 1)
+loadStep("Building catalog tab")
 
 local sFm = Instance.new("Frame")
 sFRef = sFm
@@ -356,7 +478,7 @@ sFm.Visible = false
 sFm.Parent = mF
 
 local sSBx = Instance.new("TextBox")
-sSBx.Size = UDim2.new(0.35, -scl("X", 8), 0, scl("Y", 28))
+sSBx.Size = UDim2.new(0.5, -scl("X", 8), 0, scl("Y", 28))
 sSBx.Position = UDim2.new(0, scl("X", 8), 0, 0)
 sSBx.PlaceholderText = "Search Saved..."
 sSBx.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -370,21 +492,9 @@ sSBx.Parent = sFm
 mkCr(sSBx, 4)
 mkSt(sSBx, Color3.fromRGB(80, 80, 80), 1)
 
-local sSrtB = Instance.new("TextButton", sFm)
-sSrtB.Size = UDim2.new(0.25, -scl("X", 8), 0, scl("Y", 28))
-sSrtB.Position = UDim2.new(0.35, scl("X", 4), 0, 0)
-sSrtB.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-sSrtB.BackgroundTransparency = 0.2
-sSrtB.Text = "Sort: New"
-sSrtB.Font = Enum.Font.GothamBold
-sSrtB.TextScaled = true
-sSrtB.TextColor3 = Color3.new(1, 1, 1)
-mkCr(sSrtB, 4)
-mkSt(sSrtB, Color3.fromRGB(90, 90, 90), 1)
-
 local fltB = Instance.new("TextButton", sFm)
-fltB.Size = UDim2.new(0.2, -scl("X", 8), 0, scl("Y", 28))
-fltB.Position = UDim2.new(0.60, scl("X", 4), 0, 0)
+fltB.Size = UDim2.new(0.38, -scl("X", 8), 0, scl("Y", 28))
+fltB.Position = UDim2.new(0.5, scl("X", 4), 0, 0)
 fltB.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 fltB.BackgroundTransparency = 0.2
 fltB.Text = "Filter"
@@ -395,11 +505,11 @@ mkCr(fltB, 4)
 mkSt(fltB, Color3.fromRGB(90, 90, 90), 1)
 
 local aEB = Instance.new("TextButton", sFm)
-aEB.Size = UDim2.new(0.2, -scl("X", 4), 0, scl("Y", 28))
-aEB.Position = UDim2.new(0.80, scl("X", 4), 0, 0)
+aEB.Size = UDim2.new(0.1, -scl("X", 4), 0, scl("Y", 28))
+aEB.Position = UDim2.new(0.9, scl("X", 4), 0, 0)
 aEB.BackgroundColor3 = Color3.fromRGB(40, 120, 200)
 aEB.BackgroundTransparency = 0.2
-aEB.Text = "+ Add"
+aEB.Text = "+"
 aEB.Font = Enum.Font.GothamBold
 aEB.TextScaled = true
 aEB.TextColor3 = Color3.new(1, 1, 1)
@@ -463,6 +573,7 @@ sPgB.Font = Enum.Font.Gotham
 sPgB.TextScaled = true
 sPgB.TextColor3 = Color3.new(1, 1, 1)
 sPgB.Text = "1 / 1"
+loadStep("Building saved tab")
 
 local stFm = Instance.new("Frame")
 stFm.Size = UDim2.new(0.4, -scl("X", 10), 1, -scl("Y", 70))
@@ -501,9 +612,7 @@ stLL:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     stSF.CanvasSize = UDim2.new(0, 0, 0, stLL.AbsoluteContentSize.Y + 10)
 end)
 
---=============================================
--- POPUPS SYSTEM
---=============================================
+loadStep("Building settings panel")
 local pOvl = Instance.new("Frame", mF)
 pOvl.Size = UDim2.new(1, 0, 1, 0)
 pOvl.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -532,7 +641,12 @@ local function clPops()
     end
 end
 
--- 1. ADD ID POPUP
+local function openPop(fm)
+    clPops()
+    pOvl.Visible = true
+    fm.Visible = true
+end
+
 local aPFm = mkPopFm(170)
 
 local aPT = Instance.new("TextLabel", aPFm)
@@ -595,126 +709,404 @@ aPAdd.TextScaled = true
 aPAdd.ZIndex = 52
 mkCr(aPAdd, 4)
 
--- 2. FILTER POPUP
-local fPFm = mkPopFm(210)
+loadStep("Building popups")
+local PR_MAX = 1000
+local fW = scl("X", 230)
+local fGap = scl("X", 8)
+local fShowPos = UDim2.new(0, -fW - fGap, 0, 0)
 
-local fPT = Instance.new("TextLabel", fPFm)
-fPT.Size = UDim2.new(1, 0, 0, scl("Y", 26))
-fPT.BackgroundTransparency = 1
-fPT.Text = "Filters"
-fPT.TextColor3 = Color3.new(1, 1, 1)
-fPT.Font = Enum.Font.GothamBold
-fPT.TextScaled = true
-fPT.ZIndex = 52
+local function trim(s)
+    return ((s or ""):gsub("^%s+", ""):gsub("%s+$", ""))
+end
 
-local f_FavOnly = false
-local f_MaxPrice = -1
-local f_MinPrice = -1
+local fSb = Instance.new("Frame")
+fSb.Size = UDim2.new(0, fW, 1, 0)
+fSb.Position = fShowPos
+fSb.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+fSb.BackgroundTransparency = 0.15
+fSb.Visible = false
+fSb.Parent = mF
+mkCr(fSb, 8)
+mkSt(fSb, Color3.fromRGB(90, 90, 90), 1.5)
 
-local rstFiltB = Instance.new("TextButton", fPFm)
-rstFiltB.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 26))
-rstFiltB.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 30))
-rstFiltB.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-rstFiltB.Text = "Reset Filters"
-rstFiltB.TextColor3 = Color3.new(1, 1, 1)
-rstFiltB.Font = Enum.Font.GothamBold
-rstFiltB.TextScaled = true
-rstFiltB.ZIndex = 52
-mkCr(rstFiltB, 4)
-mkSt(rstFiltB, Color3.fromRGB(80, 80, 80), 1)
+local fTitle = Instance.new("TextLabel")
+fTitle.Size = UDim2.new(1, 0, 0, scl("Y", 36))
+fTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+fTitle.BackgroundTransparency = 0.5
+fTitle.Text = "Filters"
+fTitle.TextColor3 = Color3.new(1, 1, 1)
+fTitle.Font = Enum.Font.GothamBold
+fTitle.TextScaled = true
+fTitle.Parent = fSb
+mkCr(fTitle, 8)
 
-local fPFavB = Instance.new("TextButton", fPFm)
-fPFavB.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 26))
-fPFavB.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 60))
-fPFavB.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-fPFavB.Text = "Show favorites? NO"
-fPFavB.TextColor3 = Color3.new(1, 1, 1)
-fPFavB.Font = Enum.Font.GothamBold
-fPFavB.TextScaled = true
-fPFavB.ZIndex = 52
-mkCr(fPFavB, 4)
-mkSt(fPFavB, Color3.fromRGB(70, 70, 70), 1)
+local function mkPage()
+    local sf = Instance.new("ScrollingFrame")
+    sf.Size = UDim2.new(1, -scl("X", 20), 1, -scl("Y", 46))
+    sf.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 40))
+    sf.BackgroundTransparency = 1
+    sf.CanvasSize = UDim2.new(0, 0, 0, 0)
+    sf.ScrollBarThickness = 4
+    sf.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
+    sf.ScrollingDirection = Enum.ScrollingDirection.Y
+    sf.Visible = false
+    sf.Parent = fSb
+    local ll = Instance.new("UIListLayout", sf)
+    ll.Padding = UDim.new(0, 8)
+    ll.SortOrder = Enum.SortOrder.LayoutOrder
+    ll:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        sf.CanvasSize = UDim2.new(0, 0, 0, ll.AbsoluteContentSize.Y + 10)
+    end)
+    return sf
+end
 
-fPFavB.MouseButton1Click:Connect(function()
-    f_FavOnly = not f_FavOnly
-    fPFavB.Text = "Show favorites? " .. (f_FavOnly and "YES" or "NO")
-    fPFavB.BackgroundColor3 = f_FavOnly and Color3.fromRGB(200, 160, 30) or Color3.fromRGB(40, 40, 40)
+local function mkRow(pg, h)
+    local cn = Instance.new("Frame")
+    cn.Size = UDim2.new(1, 0, 0, scl("Y", h))
+    cn.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    cn.BackgroundTransparency = 0.4
+    cn.Parent = pg
+    mkCr(cn, 6)
+    mkSt(cn, Color3.fromRGB(70, 70, 70), 1)
+    return cn
+end
+
+local function mkRLbl(cn, txt, w)
+    local lb = Instance.new("TextLabel")
+    lb.Size = UDim2.new(w, -scl("X", 10), 1, 0)
+    lb.Position = UDim2.new(0, scl("X", 10), 0, 0)
+    lb.BackgroundTransparency = 1
+    lb.Text = txt
+    lb.TextColor3 = Color3.new(1, 1, 1)
+    lb.Font = Enum.Font.Gotham
+    lb.TextScaled = true
+    lb.TextXAlignment = Enum.TextXAlignment.Left
+    lb.Parent = cn
+    return lb
+end
+
+local function mkFBtn(pg, tx, col)
+    local cn = mkRow(pg, 45)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -scl("X", 20), 1, -scl("Y", 10))
+    b.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 5))
+    b.BackgroundColor3 = col or Color3.fromRGB(40, 40, 40)
+    b.BackgroundTransparency = 0.2
+    b.Text = tx
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.GothamBold
+    b.TextScaled = true
+    b.Parent = cn
+    mkCr(b, 6)
+    mkSt(b, Color3.fromRGB(100, 100, 100), 1)
+    return b
+end
+
+local function mkFTg(pg, name, get, set)
+    local cn = mkRow(pg, 40)
+    mkRLbl(cn, name, 1).Size = UDim2.new(1, -scl("X", 90), 1, 0)
+    local tB = Instance.new("TextButton")
+    tB.Size = UDim2.new(0, scl("X", 60), 0, scl("Y", 24))
+    tB.Position = UDim2.new(1, -scl("X", 70), 0.5, -scl("Y", 12))
+    tB.Font = Enum.Font.GothamBold
+    tB.TextScaled = true
+    tB.Parent = cn
+    mkCr(tB, 4)
+    mkSt(tB, Color3.fromRGB(100, 100, 100), 1)
+    local function uV()
+        local st = get()
+        tB.Text = st and "ON" or "OFF"
+        tB.BackgroundColor3 = st and Color3.fromRGB(220, 220, 220) or Color3.fromRGB(40, 40, 40)
+        tB.TextColor3 = st and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+        tB.BackgroundTransparency = 0.2
+    end
+    tB.MouseButton1Click:Connect(function() set(not get()); uV() end)
+    uV()
+    return uV
+end
+
+local function mkFCy(pg, name, getTxt, step)
+    local cn = mkRow(pg, 40)
+    mkRLbl(cn, name, 0.4)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0.6, -scl("X", 14), 0, scl("Y", 24))
+    b.Position = UDim2.new(0.4, scl("X", 4), 0.5, -scl("Y", 12))
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    b.BackgroundTransparency = 0.2
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.GothamBold
+    b.TextScaled = true
+    b.Text = getTxt()
+    b.Parent = cn
+    mkCr(b, 4)
+    mkSt(b, Color3.fromRGB(100, 100, 100), 1)
+    b.MouseButton1Click:Connect(function() step(); b.Text = getTxt() end)
+    return function() b.Text = getTxt() end
+end
+
+local function mkFBx(pg, name, ph, onChange)
+    local cn = mkRow(pg, 40)
+    mkRLbl(cn, name, 0.4)
+    local tb = Instance.new("TextBox")
+    tb.Size = UDim2.new(0.6, -scl("X", 14), 0, scl("Y", 24))
+    tb.Position = UDim2.new(0.4, scl("X", 4), 0.5, -scl("Y", 12))
+    tb.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    tb.TextColor3 = Color3.new(1, 1, 1)
+    tb.PlaceholderText = ph
+    tb.Font = Enum.Font.Gotham
+    tb.TextScaled = true
+    tb.ClearTextOnFocus = false
+    tb.Text = ""
+    tb.Parent = cn
+    mkCr(tb, 4)
+    mkSt(tb, Color3.fromRGB(80, 80, 80), 1)
+    tb.FocusLost:Connect(function() onChange(tb.Text) end)
+    return tb
+end
+
+local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
+    local cn = mkRow(pg, 65)
+    local val = dV
+    local lb = Instance.new("TextLabel")
+    lb.Size = UDim2.new(0.5, -scl("X", 10), 0, scl("Y", 20))
+    lb.Position = UDim2.new(0, 10, 0, 5)
+    lb.BackgroundTransparency = 1
+    lb.Text = name
+    lb.TextColor3 = Color3.new(1, 1, 1)
+    lb.Font = Enum.Font.Gotham
+    lb.TextScaled = true
+    lb.TextXAlignment = Enum.TextXAlignment.Left
+    lb.Parent = cn
+    local ib = Instance.new("TextBox")
+    ib.Size = UDim2.new(0.5, -scl("X", 20), 0, scl("Y", 20))
+    ib.Position = UDim2.new(0.5, scl("X", 10), 0, scl("Y", 5))
+    ib.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ib.TextColor3 = Color3.new(1, 1, 1)
+    ib.Font = Enum.Font.Gotham
+    ib.TextScaled = true
+    ib.ClearTextOnFocus = false
+    ib.Parent = cn
+    mkCr(ib, 4)
+    mkSt(ib, Color3.fromRGB(80, 80, 80), 1)
+    local bB = Instance.new("Frame")
+    bB.Size = UDim2.new(1, -scl("X", 40), 0, scl("Y", 12))
+    bB.Position = UDim2.new(0, scl("X", 20), 0, scl("Y", 35))
+    bB.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    bB.Parent = cn
+    mkCr(bB, 6)
+    local bF = Instance.new("Frame")
+    bF.Size = UDim2.new(0, 0, 1, 0)
+    bF.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    bF.Parent = bB
+    mkCr(bF, 6)
+    local sK = Instance.new("Frame")
+    sK.Size = UDim2.new(0, scl("X", 20), 0, scl("Y", 20))
+    sK.AnchorPoint = Vector2.new(0.5, 0.5)
+    sK.Position = UDim2.new(0, 0, 0.5, 0)
+    sK.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    sK.Parent = bB
+    mkCr(sK, 10)
+    mkSt(sK, Color3.fromRGB(0, 0, 0), 1)
+    local function show()
+        ib.Text = fmt(val)
+        local al = math.clamp((val - mnV) / (mxV - mnV), 0, 1)
+        bF.Size = UDim2.new(al, 0, 1, 0)
+        sK.Position = UDim2.new(al, 0, 0.5, 0)
+    end
+    local function sV(v, silent)
+        val = math.clamp(math.floor(v / 5 + 0.5) * 5, mnV, mxV)
+        show()
+        if not silent then onChange(val) end
+    end
+    local iD = false
+    local function uD(ip)
+        local al = math.clamp((ip.Position.X - bB.AbsolutePosition.X) / bB.AbsoluteSize.X, 0, 1)
+        sV(mnV + (mxV - mnV) * al)
+    end
+    bB.InputBegan:Connect(function(ip)
+        if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = true; uD(ip) end
+    end)
+    sK.InputBegan:Connect(function(ip)
+        if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = true; uD(ip) end
+    end)
+    UIS.InputChanged:Connect(function(ip)
+        if iD and (ip.UserInputType == Enum.UserInputType.MouseMovement or ip.UserInputType == Enum.UserInputType.Touch) then uD(ip) end
+    end)
+    UIS.InputEnded:Connect(function(ip)
+        if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = false end
+    end)
+    ib.FocusLost:Connect(function()
+        local p = tonumber(ib.Text)
+        if p then sV(p) else show() end
+    end)
+    show()
+    return function(v) sV(v, true) end
+end
+
+local function fmtMin(v) return v <= 0 and "Any" or (utf8.char(0xE002) .. tostring(v)) end
+local function fmtMax(v) return v >= PR_MAX and "Any" or (utf8.char(0xE002) .. tostring(v)) end
+
+local sPg = mkPage()
+local sRstB = mkFBtn(sPg, "Reset Filters")
+
+local dbTok = 0
+local function savedChanged()
+    dbTok = dbTok + 1
+    local t = dbTok
+    task.delay(0.2, function()
+        if t == dbTok then sPN = 1; if rSvd then rSvd() end end
+    end)
+end
+
+local uSSort = mkFCy(sPg, "Sort", function() return sSrtA[sSrtI] end, function()
+    sSrtI = sSrtI % #sSrtA + 1; savedChanged()
+end)
+local uFav = mkFTg(sPg, "Favorites Only", function() return f_FavOnly end, function(v)
+    f_FavOnly = v; savedChanged()
+end)
+local sCrBx = mkFBx(sPg, "Creator", "username", function(t)
+    f_Creator = trim(t):lower(); savedChanged()
+end)
+local setSMin = mkFSl(sPg, "Min Price", 0, PR_MAX, 0, fmtMin, function(v)
+    f_MinPrice = v > 0 and v or -1; savedChanged()
+end)
+local setSMax = mkFSl(sPg, "Max Price", 0, PR_MAX, PR_MAX, fmtMax, function(v)
+    f_MaxPrice = v >= PR_MAX and -1 or v; savedChanged()
 end)
 
-local fPMaxP = Instance.new("TextBox", fPFm)
-fPMaxP.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 26))
-fPMaxP.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 90))
-fPMaxP.PlaceholderText = "Max prices?"
-fPMaxP.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-fPMaxP.TextColor3 = Color3.new(1, 1, 1)
-fPMaxP.Font = Enum.Font.Gotham
-fPMaxP.TextScaled = true
-fPMaxP.ClearTextOnFocus = false
-fPMaxP.Text = ""
-fPMaxP.ZIndex = 52
-mkCr(fPMaxP, 4)
-mkSt(fPMaxP, Color3.fromRGB(70, 70, 70), 1)
-
-local fPMinP = Instance.new("TextBox", fPFm)
-fPMinP.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 26))
-fPMinP.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 120))
-fPMinP.PlaceholderText = "Min prices?"
-fPMinP.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-fPMinP.TextColor3 = Color3.new(1, 1, 1)
-fPMinP.Font = Enum.Font.Gotham
-fPMinP.TextScaled = true
-fPMinP.ClearTextOnFocus = false
-fPMinP.Text = ""
-fPMinP.ZIndex = 52
-mkCr(fPMinP, 4)
-mkSt(fPMinP, Color3.fromRGB(70, 70, 70), 1)
-
-local fPAply = Instance.new("TextButton", fPFm)
-fPAply.Size = UDim2.new(1, -scl("X", 20), 0, scl("Y", 30))
-fPAply.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 155))
-fPAply.BackgroundColor3 = Color3.fromRGB(40, 120, 200)
-fPAply.Text = "Apply filters"
-fPAply.TextColor3 = Color3.new(1, 1, 1)
-fPAply.Font = Enum.Font.GothamBold
-fPAply.TextScaled = true
-fPAply.ZIndex = 52
-mkCr(fPAply, 4)
-
-local rSvd
-
-rstFiltB.MouseButton1Click:Connect(function()
-    f_FavOnly = false
-    fPFavB.Text = "Show favorites? NO"
-    fPFavB.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    fPMaxP.Text = ""
-    fPMinP.Text = ""
-    f_MaxPrice = -1
-    f_MinPrice = -1
-    clPops()
-    if rSvd then rSvd() end
+sRstB.MouseButton1Click:Connect(function()
+    f_FavOnly = false; f_Creator = ""; f_MinPrice = -1; f_MaxPrice = -1
+    uFav(); sCrBx.Text = ""; setSMin(0); setSMax(PR_MAX)
+    savedChanged()
 end)
 
-fPAply.MouseButton1Click:Connect(function()
-    local maxP = tonumber(fPMaxP.Text)
-    f_MaxPrice = maxP or -1
-    if not maxP then fPMaxP.Text = "" end
+local CAT_DEBOUNCE = 0.9
+local CAT_MIN_GAP = 1.5
+local catSchedTok = 0
+local catBusy = false
+local catLastAt = -100
+local catLastSig = nil
+local catBackoff = 0
+local catRetry = 0
+local catLastPage = 0
+local catStatus = function() end
 
-    local minP = tonumber(fPMinP.Text)
-    f_MinPrice = minP or -1
-    if not minP then fPMinP.Text = "" end
+local function catSig(q)
+    return table.concat({q, cSI, c_Sales, c_Cat, tostring(c_Off), c_Creator:lower(), c_MinPrice, c_MaxPrice}, "|")
+end
 
-    clPops()
-    if rSvd then rSvd() end
+local function schedCat(instant, force, q, isRetry)
+    if not isRetry then catRetry = 0 end
+    catSchedTok = catSchedTok + 1
+    local tk = catSchedTok
+    task.spawn(function()
+        if not instant then
+            catStatus("Waiting...")
+            task.wait(CAT_DEBOUNCE)
+        end
+
+        while true do
+            if tk ~= catSchedTok then return end
+            local gap = catLastAt + CAT_MIN_GAP + catBackoff - os.clock()
+            if not catBusy and gap <= 0 then break end
+            task.wait(math.max(gap, 0.1))
+        end
+        if tk ~= catSchedTok then return end
+        local query = (q ~= nil) and q or cSQ
+        local sig = catSig(query)
+        if not force and sig == catLastSig then
+            catStatus(nil)
+            return
+        end
+        catBusy = true
+        local ok = pSr and pSr(query)
+        catBusy = false
+        catLastAt = os.clock()
+        if ok then
+            catLastSig = sig
+            catBackoff = 0
+            catRetry = 0
+        else
+            catBackoff = math.min(catBackoff == 0 and 3 or catBackoff * 2, 30)
+            catRetry = catRetry + 1
+            if catRetry <= 4 then
+                catStatus("Retrying...")
+                if tk == catSchedTok then schedCat(true, true, query, true) end
+            else
+                catStatus("Search failed")
+            end
+        end
+    end)
+end
+
+local function catChanged() schedCat(false, false) end
+
+local cPg = mkPage()
+local cRstB = mkFBtn(cPg, "Reset Filters")
+
+local uCSort = mkFCy(cPg, "Sort", function() return sT[cSI][2] end, function()
+    cSI = cSI % #sT + 1; catChanged()
 end)
+local uCSales = mkFCy(cPg, "Sales", function() return salesList[c_Sales].Name end, function()
+    c_Sales = c_Sales % #salesList + 1; catChanged()
+end)
+local uCCat = mkFCy(cPg, "Category", function() return catList[c_Cat].Name end, function()
+    c_Cat = c_Cat % #catList + 1; catChanged()
+end)
+local uCOff = mkFTg(cPg, "Include Off Sale", function() return c_Off end, function(v)
+    c_Off = v; catChanged()
+end)
+local cCrBx = mkFBx(cPg, "Creator", "username", function(t)
+    c_Creator = trim(t); catChanged()
+end)
+local setCMin = mkFSl(cPg, "Min Price", 0, PR_MAX, 0, fmtMin, function(v)
+    c_MinPrice = v > 0 and v or -1; catChanged()
+end)
+local setCMax = mkFSl(cPg, "Max Price", 0, PR_MAX, PR_MAX, fmtMax, function(v)
+    c_MaxPrice = v >= PR_MAX and -1 or v; catChanged()
+end)
+
+cRstB.MouseButton1Click:Connect(function()
+    cSI = 1
+    c_Sales = idxOf(salesList, Enum.SalesTypeFilter.All)
+    c_Cat = idxOf(catList, Enum.CatalogCategoryFilter.None)
+    c_Off = true; c_Creator = ""; c_MinPrice = -1; c_MaxPrice = -1
+    uCSort(); uCSales(); uCCat(); uCOff()
+    cCrBx.Text = ""; setCMin(0); setCMax(PR_MAX)
+    catChanged()
+end)
+
+loadStep("Building filters")
+local fOpen, fTab = false, "c"
+
+local function showFPage()
+    cPg.Visible = (fTab == "c")
+    sPg.Visible = (fTab == "s")
+    fTitle.Text = fTab == "c" and "Catalog Filters" or "Saved Filters"
+end
+
+local function setFSb(open)
+    fOpen = open
+    if open then showFPage() end
+    fSb.Visible = open
+end
+
+local function toggleFSb(tab)
+    if fOpen and fTab == tab then
+        setFSb(false)
+    else
+        fTab = tab
+        if fOpen then showFPage() else setFSb(true) end
+    end
+end
 
 aEB.MouseButton1Click:Connect(function()
-    pOvl.Visible = true; aPFm.Visible = true; fPFm.Visible = false
     aPId.Text = ""; aPNm.Text = ""
+    openPop(aPFm)
 end)
 
-fltB.MouseButton1Click:Connect(function()
-    pOvl.Visible = true; fPFm.Visible = true; aPFm.Visible = false
-end)
+fltB.MouseButton1Click:Connect(function() toggleFSb("s") end)
+cFltB.MouseButton1Click:Connect(function() toggleFSb("c") end)
 
 aPAdd.MouseButton1Click:Connect(function()
     local id = tonumber(aPId.Text)
@@ -733,7 +1125,7 @@ aPAdd.MouseButton1Click:Connect(function()
                 table.insert(sEmt, {
                     Id = id, AssetId = id, Name = nm,
                     AnimationId = "rbxassetid://" .. tostring(rI or id),
-                    Favorite = false, Price = 0, Idx = #sEmt + 1
+                    Favorite = false, Price = 0, Idx = #sEmt + 1, Creator = ""
                 })
                 svEmt()
                 if rSvd then rSvd() end
@@ -947,21 +1339,7 @@ rstB.MouseButton1Click:Connect(function()
     cfg:ET("Looped", true)
 end)
 
-local sT = {
-    {Enum.CatalogSortType.Relevance, "Relevance"},
-    {Enum.CatalogSortType.PriceHighToLow, "Price H→L"},
-    {Enum.CatalogSortType.PriceLowToHigh, "Price L→H"},
-    {Enum.CatalogSortType.MostFavorited, "Most Fav"},
-    {Enum.CatalogSortType.RecentlyCreated, "Recent"},
-    {Enum.CatalogSortType.Bestselling, "Bestsell"}
-}
-
-local cSI = 1
-local cSQ = ""
-local cPC = nil
-local cPN = 1
-local cTId = 1
-
+loadStep("Building settings widgets")
 local function fCP(kw)
     if r6 then
         return {
@@ -972,12 +1350,15 @@ local function fCP(kw)
     end
     local sP = CatalogSearchParams.new()
     sP.SearchKeyword = kw or ""
-    sP.CategoryFilter = Enum.CatalogCategoryFilter.None
-    sP.SalesTypeFilter = Enum.SalesTypeFilter.All
+    sP.CategoryFilter = catList[c_Cat]
+    sP.SalesTypeFilter = salesList[c_Sales]
     sP.AssetTypes = {Enum.AvatarAssetType.EmoteAnimation}
-    sP.IncludeOffSale = true
+    sP.IncludeOffSale = c_Off
     sP.SortType = sT[cSI][1]
     sP.Limit = 10
+    if c_Creator ~= "" then sP.CreatorName = c_Creator end
+    if c_MinPrice >= 0 then sP.MinPrice = c_MinPrice end
+    if c_MaxPrice >= 0 then sP.MaxPrice = c_MaxPrice end
     local s, r = pcall(function() return AES:SearchCatalog(sP) end)
     return s and r or nil
 end
@@ -989,7 +1370,7 @@ local function mkCCd(it)
     cd.BackgroundTransparency = 0.1
     mkCr(cd, 10)
     mkSt(cd, Color3.fromRGB(60, 60, 60), 1.5)
-    
+
     local aI = it.AssetId or it.Id
     local tn = Instance.new("ImageLabel")
     tn.Size = UDim2.new(1, -scl("X", 10), 0, scl("Y", 90))
@@ -1000,7 +1381,7 @@ local function mkCCd(it)
     tn.Image = "rbxthumb://type=Asset&id=" .. tonumber(aI) .. "&w=150&h=150"
     tn.Parent = cd
     mkCr(tn, 6)
-    
+
     local nL = Instance.new("TextLabel")
     nL.Size = UDim2.new(1, -scl("X", 10), 0, scl("Y", 32))
     nL.Position = UDim2.new(0, scl("X", 5), 0, scl("Y", 100))
@@ -1011,9 +1392,9 @@ local function mkCCd(it)
     nL.Font = Enum.Font.GothamSemibold
     nL.TextColor3 = Color3.fromRGB(240, 240, 240)
     nL.Parent = cd
-    
+
     mkPr(cd, it.Price)
-    
+
     local sU = "https://www.roblox.com/catalog/" .. tonumber(it.Id)
     local lB = Instance.new("TextButton")
     lB.Parent = cd
@@ -1036,7 +1417,7 @@ local function mkCCd(it)
         lB.Text = "🔗"
         lB.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     end)
-    
+
     local pB = Instance.new("TextButton")
     pB.Size = UDim2.new(0.45, -scl("X", 5), 0, scl("Y", 26))
     pB.Position = UDim2.new(0, scl("X", 5), 1, -scl("Y", 32))
@@ -1049,11 +1430,11 @@ local function mkCCd(it)
     pB.Parent = cd
     mkCr(pB, 6)
     pB.MouseButton1Click:Connect(function() plEmt(aI) end)
-    
+
     local sB = Instance.new("TextButton")
     sB.Size = UDim2.new(0.45, -scl("X", 5), 0, scl("Y", 26))
     sB.Position = UDim2.new(0.55, 0, 1, -scl("Y", 32))
-    sB.BackgroundColor3 = Color3.fromRGB(40, 120, 200) 
+    sB.BackgroundColor3 = Color3.fromRGB(40, 120, 200)
     sB.BackgroundTransparency = 0.2
     sB.Text = "Save"
     sB.Font = Enum.Font.GothamBold
@@ -1074,7 +1455,8 @@ local function mkCCd(it)
                 table.insert(sEmt, {
                     Id = it.Id, AssetId = aI, Name = it.Name or "Unknown",
                     AnimationId = "rbxassetid://" .. tostring(rI or aI),
-                    Favorite = false, Price = it.Price or 0, Idx = #sEmt + 1
+                    Favorite = false, Price = it.Price or 0, Idx = #sEmt + 1,
+                    Creator = tostring(it.CreatorName or "")
                 })
                 svEmt()
                 sB.Text = "Saved!"
@@ -1148,6 +1530,9 @@ cPgB.Font = Enum.Font.Gotham
 cPgB.TextScaled = true
 cPgB.TextColor3 = Color3.new(1, 1, 1)
 cPgB.Text = "1 / Enter page"
+catStatus = function(t)
+    cPgB.Text = t or (tostring(cPN) .. " / Enter page")
+end
 
 local pEL = Instance.new("TextLabel", cFm)
 pEL.Size = UDim2.new(0.3, 0, 0, scl("Y", 24))
@@ -1181,14 +1566,14 @@ local function rCP(pD)
     if it and #it > 0 then
         eCL.Visible = false
         local mTI = cTId
-        local sT = os.clock()
+        local sTm = os.clock()
         for _, i in ipairs(it) do
             if cTId ~= mTI or mR ~= cRId then break end
             local cd = mkCCd(i)
             cd.Parent = cSFm
-            if os.clock() - sT > 0.005 then
+            if os.clock() - sTm > 0.005 then
                 RS.RenderStepped:Wait()
-                sT = os.clock()
+                sTm = os.clock()
             end
         end
     else
@@ -1208,29 +1593,30 @@ local function gPO(tP)
         if iP.IsFinished then break end
         local s = pcall(function() iP:AdvanceToNextPageAsync() end)
         if not s then break end
+        if i < tP then task.wait(0.4) end
     end
     return iP
 end
 
-local function pSr(q)
-    cSQ = q or ""
-    cPN = 1
+pSr = function(q)
+    local nq = q or ""
     cPgB.Text = "Loading..."
-    cPC = fCP(cSQ)
-    if cPC then rCP(cPC) end
+    local pg = fCP(nq)
+    if not pg then return false end
+    cSQ = nq
+    cPN = 1
+    cPC = pg
+    rCP(cPC)
+    return true
 end
 
-rfB.MouseButton1Click:Connect(function() pSr(sBx.Text) end)
-sBx.FocusLost:Connect(function(eP) if eP then pSr(sBx.Text) end end)
-
-srtB.MouseButton1Click:Connect(function()
-    cSI = cSI % #sT + 1
-    srtB.Text = "Sort: " .. sT[cSI][2]
-    pSr(cSQ)
-end)
+rfB.MouseButton1Click:Connect(function() schedCat(true, true, sBx.Text) end)
+sBx.FocusLost:Connect(function(eP) if eP then schedCat(true, false, sBx.Text) end end)
 
 local function gNP()
     if not cPC or cPC.IsFinished then return end
+    if os.clock() - catLastPage < 0.6 then return end
+    catLastPage = os.clock()
     local s = pcall(function() cPC:AdvanceToNextPageAsync() end)
     if s then
         cPN = cPN + 1
@@ -1248,6 +1634,8 @@ end
 
 local function gPP()
     if not cPC or cPN <= 1 then return end
+    if os.clock() - catLastPage < 0.6 then return end
+    catLastPage = os.clock()
     local s = pcall(function() cPC:AdvanceToPreviousPageAsync() end)
     if s then
         cPN = math.max(1, cPN - 1)
@@ -1311,7 +1699,7 @@ local function mkSCd(it)
     cd.BackgroundTransparency = 0.1
     mkCr(cd, 10)
     mkSt(cd, Color3.fromRGB(60, 60, 60), 1.5)
-    
+
     local tn = Instance.new("ImageLabel")
     tn.Size = UDim2.new(1, -scl("X", 10), 0, scl("Y", 100))
     tn.Position = UDim2.new(0, scl("X", 5), 0, scl("Y", 5))
@@ -1321,7 +1709,7 @@ local function mkSCd(it)
     tn.Image = "rbxthumb://type=Asset&id=" .. tonumber(it.AssetId or it.Id) .. "&w=150&h=150"
     tn.Parent = cd
     mkCr(tn, 6)
-    
+
     local nL = Instance.new("TextLabel")
     nL.Size = UDim2.new(1, -scl("X", 10), 0, scl("Y", 36))
     nL.Position = UDim2.new(0, scl("X", 5), 0, scl("Y", 110))
@@ -1332,9 +1720,9 @@ local function mkSCd(it)
     nL.Font = Enum.Font.GothamSemibold
     nL.TextColor3 = Color3.fromRGB(240, 240, 240)
     nL.Parent = cd
-    
+
     mkPr(cd, it.Price)
-    
+
     local pB = Instance.new("TextButton")
     pB.Size = UDim2.new(0.45, -scl("X", 5), 0, scl("Y", 26))
     pB.Position = UDim2.new(0, scl("X", 5), 1, -scl("Y", 32))
@@ -1347,20 +1735,20 @@ local function mkSCd(it)
     pB.Parent = cd
     mkCr(pB, 6)
     pB.MouseButton1Click:Connect(function() plEmt(it.Id) end)
-    
-    local rB = Instance.new("TextButton")
-    rB.Size = UDim2.new(0.45, -scl("X", 5), 0, scl("Y", 26))
-    rB.Position = UDim2.new(0.55, 0, 1, -scl("Y", 32))
-    rB.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-    rB.BackgroundTransparency = 0.2
-    rB.Text = "Remove"
-    rB.Font = Enum.Font.GothamBold
-    rB.TextScaled = true
-    rB.TextColor3 = Color3.fromRGB(255, 255, 255)
-    rB.Parent = cd
-    mkCr(rB, 6)
-    mkSt(rB, Color3.fromRGB(120, 40, 40), 1)
-    
+
+    local rmB = Instance.new("TextButton")
+    rmB.Size = UDim2.new(0.45, -scl("X", 5), 0, scl("Y", 26))
+    rmB.Position = UDim2.new(0.55, 0, 1, -scl("Y", 32))
+    rmB.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    rmB.BackgroundTransparency = 0.2
+    rmB.Text = "Remove"
+    rmB.Font = Enum.Font.GothamBold
+    rmB.TextScaled = true
+    rmB.TextColor3 = Color3.fromRGB(255, 255, 255)
+    rmB.Parent = cd
+    mkCr(rmB, 6)
+    mkSt(rmB, Color3.fromRGB(120, 40, 40), 1)
+
     local cB = Instance.new("TextButton")
     cB.Size = UDim2.new(0, scl("X", 26), 0, scl("Y", 26))
     cB.Position = UDim2.new(1, -scl("X", 31), 0, scl("Y", 10))
@@ -1374,14 +1762,14 @@ local function mkSCd(it)
     mkCr(cB, 6)
     mkSt(cB, Color3.fromRGB(80, 80, 80), 1)
     cB.MouseButton1Click:Connect(function()
-        if setclipboard then setclipboard(it.AnimationId:gsub("rbxassetid://", "")) end
+        if setclipboard then setclipboard((it.AnimationId:gsub("rbxassetid://", ""))) end
         cB.Text = "✅"
         cB.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
         task.wait(0.7)
         cB.Text = "📋"
         cB.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     end)
-    
+
     local fB = Instance.new("TextButton")
     fB.Size = UDim2.new(0, scl("X", 26), 0, scl("Y", 26))
     fB.Position = UDim2.new(1, -scl("X", 31), 0, scl("Y", 42))
@@ -1401,8 +1789,8 @@ local function mkSCd(it)
         svEmt()
         if rSvd then rSvd() end
     end)
-    
-    rB.MouseButton1Click:Connect(function()
+
+    rmB.MouseButton1Click:Connect(function()
         for i, sI in ipairs(sEmt) do
             if sI.Id == it.Id then
                 table.remove(sEmt, i)
@@ -1414,19 +1802,6 @@ local function mkSCd(it)
     end)
     return cd
 end
-
-local sSrtI = 1
-local sSrtA = {"Newest", "Oldest", "A-Z", "Z-A", "Price H-L", "Price L-H"}
-local sPN = 1
-local sRId = 0
-local sMxP = 1
-
-sSrtB.MouseButton1Click:Connect(function()
-    sSrtI = (sSrtI % #sSrtA) + 1
-    sSrtB.Text = "Sort: " .. sSrtA[sSrtI]
-    sPN = 1
-    rSvd()
-end)
 
 sPgB.FocusLost:Connect(function(eP)
     if eP then
@@ -1454,19 +1829,23 @@ rSvd = function()
     end
     local sQ = (sSBx.Text or ""):lower()
     local fL = {}
-    
+
     for _, it in ipairs(sEmt) do
-        if sQ == "" or (it.Name and it.Name:lower():find(sQ)) then
+        if sQ == "" or (it.Name and it.Name:lower():find(sQ, 1, true)) then
             local pass = true
             if f_FavOnly and not it.Favorite then pass = false end
             local p = tonumber(it.Price) or 0
             if f_MaxPrice >= 0 and p > f_MaxPrice then pass = false end
             if f_MinPrice >= 0 and p < f_MinPrice then pass = false end
-            
+            if f_Creator ~= "" then
+                local cr = tostring(it.Creator or ""):lower()
+                if not cr:find(f_Creator, 1, true) then pass = false end
+            end
+
             if pass then table.insert(fL, it) end
         end
     end
-    
+
     table.sort(fL, function(a, b)
         if a.Favorite ~= b.Favorite then return a.Favorite end
         if sSrtI == 1 then return (a.Idx or 0) > (b.Idx or 0)
@@ -1487,14 +1866,14 @@ rSvd = function()
     if #fL > 0 then
         eSL.Visible = false
         local mTI = cTId
-        local sT = os.clock()
+        local sTm = os.clock()
         for i = st, en do
             if cTId ~= mTI or mR ~= sRId then break end
             local cd = mkSCd(fL[i])
             cd.Parent = sSFm
-            if os.clock() - sT > 0.005 then
+            if os.clock() - sTm > 0.005 then
                 RS.RenderStepped:Wait()
-                sT = os.clock()
+                sTm = os.clock()
             end
         end
     else
@@ -1506,6 +1885,7 @@ rSvd = function()
 end
 
 cTb.MouseButton1Click:Connect(function()
+    fTab = "c"; if fOpen then showFPage() end
     cTId = cTId + 1
     cFm.Visible = true; sFm.Visible = false
     cTb.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
@@ -1517,6 +1897,7 @@ sSBx:GetPropertyChangedSignal("Text"):Connect(function()
 end)
 
 sTb.MouseButton1Click:Connect(function()
+    fTab = "s"; if fOpen then showFPage() end
     cTId = cTId + 1
     cFm.Visible = false; sFm.Visible = true
     cTb.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -1524,7 +1905,9 @@ sTb.MouseButton1Click:Connect(function()
     rSvd()
 end)
 
-pSr("")
+loadStep("Loading catalog")
+if pSr("") then catLastSig = catSig(""); catLastAt = os.clock() end
+loadStep("Building toggle button")
 
 local function tMUI() mG.Enabled = not mG.Enabled end
 
@@ -1532,7 +1915,7 @@ local tG = Instance.new("ScreenGui")
 tG.Name = "ToggleButtonGui"
 tG.ResetOnSpawn = false
 tG.Parent = cG
-tG.Enabled = true
+tG.Enabled = false
 
 local tB = Instance.new("TextButton")
 tB.Parent = tG
@@ -1559,8 +1942,13 @@ UIS.InputBegan:Connect(function(ip, gP)
     if ip.UserInputType == Enum.UserInputType.Keyboard and ip.KeyCode == Enum.KeyCode.G then tMUI() end
 end)
 
-mG.Enabled = true
+loadStep("Loading saved list")
 rSvd()
+loadStep("Ready")
+setFSb(true)
+mG.Enabled = true
+tG.Enabled = true
+ldG:Destroy()
 
 task.spawn(function()
     local function sCl(c)
