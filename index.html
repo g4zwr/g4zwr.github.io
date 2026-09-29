@@ -27,7 +27,15 @@
     --font-sans:'IBM Plex Sans',sans-serif;
   }
 
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    /* nothing on this site is meant to be copied — kills selection and the
+       iOS long-press callout everywhere, canvases and text alike */
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
+  }
   html{
     scroll-behavior:smooth;
     scrollbar-color:rgba(255,255,255,0.25) #000000;
@@ -69,7 +77,18 @@
     z-index:-3;
     background:#000000;
     filter:blur(3px);
-    transform:scale(1.05);
+    /* the rain is a wall falling into the screen: leaned back in perspective
+       and oversized so the tilt never exposes a canvas edge. JS sways it
+       toward the cursor on fine pointers; touch gets the idle sway below. */
+    transform:perspective(750px) rotateX(16deg) scale(1.3);
+    transform-origin:50% 24%;
+  }
+  @media (hover:none){
+    #matrix-bg{ animation:bg-sway 9s ease-in-out infinite; }
+  }
+  @keyframes bg-sway{
+    0%,100%{ transform:perspective(750px) rotateX(16deg) rotateY(-4deg) scale(1.3); }
+    50%{ transform:perspective(750px) rotateX(13deg) rotateY(4deg) scale(1.3); }
   }
 
   #visualizer{
@@ -305,7 +324,7 @@
     text-align:center;
     padding:60px 24px;
     position:relative;
-    perspective:850px;
+    perspective:620px;
     background:radial-gradient(ellipse 72% 52% at 50% 46%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.34) 46%, rgba(0,0,0,0) 78%);
   }
 
@@ -332,9 +351,10 @@
     inset:0;
     text-align:center;
     white-space:nowrap;
-    color:#0f0f0f;
+    /* bright walls: light gray sides pop against the black page; JS shades
+       each layer from near-white at the face down to deep gray at the back */
+    color:#d6d6d6;
   }
-  .hero h1 .t3d-layer:last-child{ color:#2d2d2d; }
   .hero h1::after{ text-shadow:none; }
   .hero-panel{
     position:relative;
@@ -1654,7 +1674,7 @@
   // negative depth. Rotation then shows genuine side walls instead of a baked
   // text-shadow that ignores the tilt.
   (function buildExtrusion(){
-    const LAYERS = 10, STEP = 1.2;   // ~12px total depth
+    const LAYERS = 8, STEP = 6.5;   // ~52px: chunky stepped walls, not a smear
     const depth = document.createElement('span');
     depth.className = 't3d-depth';
     depth.setAttribute('aria-hidden', 'true');
@@ -1662,6 +1682,11 @@
       const l = document.createElement('span');
       l.className = 't3d-layer';
       l.style.transform = `translateZ(${(-i * STEP).toFixed(1)}px)`;
+      // bright side-walls stepping down to mid-gray at the back — reads as a
+      // solid white slab with lit sides instead of a soft shadow
+      const t = (LAYERS - i) / (LAYERS - 1);
+      const v = Math.round(216 - t * 150);   // 216 → 66 in RGB
+      l.style.color = `rgb(${v},${v},${v})`;
       l.textContent = heroText;
       depth.appendChild(l);
     }
@@ -2687,6 +2712,27 @@
     start();
   })();
 
+  /* ── 3D rain wall: the whole background leans toward the cursor ── */
+  (function(){
+    if(reduceMotion) return;
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const bg = document.getElementById('matrix-bg');
+    if(!fine || !bg) return;
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    function frame(){
+      raf = 0;
+      cx += (tx - cx) * 0.16;
+      cy += (ty - cy) * 0.16;
+      bg.style.transform = `perspective(750px) rotateX(${(16 - cy * 7).toFixed(2)}deg) rotateY(${(cx * 9).toFixed(2)}deg) scale(1.34)`;
+      if(Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) raf = requestAnimationFrame(frame);
+    }
+    window.addEventListener('pointermove', (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      if(!raf) raf = requestAnimationFrame(frame);
+    }, { passive: true });
+  })();
+
   /* ── 3D hero tilt: title + panel ease toward the cursor, back to rest on leave ── */
   (function(){
     const hero = document.querySelector('.hero');
@@ -2697,10 +2743,10 @@
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
     function frame(){
       raf = 0;
-      cx += (tx - cx) * 0.14;
-      cy += (ty - cy) * 0.14;
-      title.style.transform = `rotateY(${(cx * 15).toFixed(2)}deg) rotateX(${(-cy * 12).toFixed(2)}deg) translateZ(22px)`;
-      if(panel) panel.style.transform = `rotateY(${(cx * 10).toFixed(2)}deg) rotateX(${(-cy * 8).toFixed(2)}deg) translateZ(10px)`;
+      cx += (tx - cx) * 0.28;
+      cy += (ty - cy) * 0.28;
+      title.style.transform = `rotateY(${(cx * 30).toFixed(2)}deg) rotateX(${(-cy * 24).toFixed(2)}deg) translateZ(26px)`;
+      if(panel) panel.style.transform = `rotateY(${(cx * 16).toFixed(2)}deg) rotateX(${(-cy * 13).toFixed(2)}deg) translateZ(10px)`;
       if(Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) raf = requestAnimationFrame(frame);
     }
     hero.addEventListener('pointermove', (e) => {
