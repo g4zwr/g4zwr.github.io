@@ -384,8 +384,8 @@ local rSvd, pSr
 
 local sT = {
     {Enum.CatalogSortType.Relevance, "Relevance"},
-    {Enum.CatalogSortType.PriceHighToLow, "Price H→L"},
-    {Enum.CatalogSortType.PriceLowToHigh, "Price L→H"},
+    {Enum.CatalogSortType.PriceHighToLow, "Price High"},
+    {Enum.CatalogSortType.PriceLowToHigh, "Price Low"},
     {Enum.CatalogSortType.MostFavorited, "Most Fav"},
     {Enum.CatalogSortType.RecentlyCreated, "Recent"},
     {Enum.CatalogSortType.Bestselling, "Bestsell"}
@@ -410,7 +410,7 @@ local c_MaxPrice = -1
 local c_MinPrice = -1
 
 local sSrtI = 1
-local sSrtA = {"Newest", "Oldest", "A-Z", "Z-A", "Price H-L", "Price L-H"}
+local sSrtA = {"Newest", "Oldest", "A-Z", "Z-A", "Price High", "Price Low"}
 local sPN = 1
 local sRId = 0
 local sMxP = 1
@@ -528,7 +528,7 @@ local eSL = Instance.new("TextLabel")
 eSL.Size = UDim2.new(1, 0, 0, scl("Y", 36))
 eSL.Position = UDim2.new(0, 0, 0.5, -scl("Y", 18))
 eSL.BackgroundTransparency = 1
-eSL.Text = "Sorry I Was Changing Save Files Again 😅"
+eSL.Text = "It's Eternity In Here."
 eSL.TextColor3 = Color3.new(1, 1, 1)
 eSL.Font = Enum.Font.GothamBold
 eSL.TextScaled = true
@@ -711,7 +711,7 @@ mkCr(aPAdd, 4)
 
 loadStep("Building popups")
 local PR_MAX = 1000
-local fW = scl("X", 230)
+local fW = scl("X", 180)
 local fGap = scl("X", 8)
 local fShowPos = UDim2.new(0, -fW - fGap, 0, 0)
 
@@ -720,7 +720,7 @@ local function trim(s)
 end
 
 local fSb = Instance.new("Frame")
-fSb.Size = UDim2.new(0, fW, 1, 0)
+fSb.Size = UDim2.new(0, fW, 0.9, 0)
 fSb.Position = fShowPos
 fSb.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 fSb.BackgroundTransparency = 0.15
@@ -867,9 +867,10 @@ end
 local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
     local cn = mkRow(pg, 65)
     local val = dV
+
     local lb = Instance.new("TextLabel")
-    lb.Size = UDim2.new(0.5, -scl("X", 10), 0, scl("Y", 20))
-    lb.Position = UDim2.new(0, 10, 0, 5)
+    lb.Size = UDim2.new(0.4, -scl("X", 10), 0, scl("Y", 20))
+    lb.Position = UDim2.new(0, scl("X", 10), 0, scl("Y", 5))
     lb.BackgroundTransparency = 1
     lb.Text = name
     lb.TextColor3 = Color3.new(1, 1, 1)
@@ -877,9 +878,21 @@ local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
     lb.TextScaled = true
     lb.TextXAlignment = Enum.TextXAlignment.Left
     lb.Parent = cn
+
+    -- Custom TextLabel for Robux Icon placed beside the TextBox
+    local iconLbl = Instance.new("TextLabel")
+    iconLbl.Size = UDim2.new(0, scl("X", 18), 0, scl("Y", 20))
+    iconLbl.Position = UDim2.new(0.4, scl("X", 5), 0, scl("Y", 5))
+    iconLbl.BackgroundTransparency = 1
+    iconLbl.Text = utf8.char(0xE002)
+    iconLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    iconLbl.Font = Enum.Font.GothamBold
+    iconLbl.TextScaled = true
+    iconLbl.Parent = cn
+
     local ib = Instance.new("TextBox")
-    ib.Size = UDim2.new(0.5, -scl("X", 20), 0, scl("Y", 20))
-    ib.Position = UDim2.new(0.5, scl("X", 10), 0, scl("Y", 5))
+    ib.Size = UDim2.new(0.6, -scl("X", 30), 0, scl("Y", 20))
+    ib.Position = UDim2.new(0.4, scl("X", 25), 0, scl("Y", 5))
     ib.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     ib.TextColor3 = Color3.new(1, 1, 1)
     ib.Font = Enum.Font.Gotham
@@ -888,17 +901,20 @@ local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
     ib.Parent = cn
     mkCr(ib, 4)
     mkSt(ib, Color3.fromRGB(80, 80, 80), 1)
+
     local bB = Instance.new("Frame")
     bB.Size = UDim2.new(1, -scl("X", 40), 0, scl("Y", 12))
     bB.Position = UDim2.new(0, scl("X", 20), 0, scl("Y", 35))
     bB.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     bB.Parent = cn
     mkCr(bB, 6)
+
     local bF = Instance.new("Frame")
     bF.Size = UDim2.new(0, 0, 1, 0)
     bF.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
     bF.Parent = bB
     mkCr(bF, 6)
+
     local sK = Instance.new("Frame")
     sK.Size = UDim2.new(0, scl("X", 20), 0, scl("Y", 20))
     sK.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -907,22 +923,37 @@ local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
     sK.Parent = bB
     mkCr(sK, 10)
     mkSt(sK, Color3.fromRGB(0, 0, 0), 1)
+    
     local function show()
-        ib.Text = fmt(val)
+        local formattedVal = fmt(val)
+        ib.Text = formattedVal
+
+        -- Displays icon beside textbox only when value is active/numerical
+        if formattedVal ~= "Any" then
+            iconLbl.Text = utf8.char(0xE002)
+            iconLbl.Visible = true
+        else
+            iconLbl.Text = ""
+            iconLbl.Visible = false
+        end
+
         local al = math.clamp((val - mnV) / (mxV - mnV), 0, 1)
         bF.Size = UDim2.new(al, 0, 1, 0)
         sK.Position = UDim2.new(al, 0, 0.5, 0)
     end
-    local function sV(v, silent)
-        val = math.clamp(math.floor(v / 5 + 0.5) * 5, mnV, mxV)
+    
+    local function sV(v, silent, skipClamp)
+        val = skipClamp and v or math.clamp(math.floor(v / 5 + 0.5) * 5, mnV, mxV)
         show()
         if not silent then onChange(val) end
     end
+    
     local iD = false
     local function uD(ip)
         local al = math.clamp((ip.Position.X - bB.AbsolutePosition.X) / bB.AbsoluteSize.X, 0, 1)
-        sV(mnV + (mxV - mnV) * al)
+        sV(mnV + (mxV - mnV) * al, false, false)
     end
+    
     bB.InputBegan:Connect(function(ip)
         if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = true; uD(ip) end
     end)
@@ -935,16 +966,27 @@ local function mkFSl(pg, name, mnV, mxV, dV, fmt, onChange)
     UIS.InputEnded:Connect(function(ip)
         if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = false end
     end)
+    
     ib.FocusLost:Connect(function()
         local p = tonumber(ib.Text)
-        if p then sV(p) else show() end
+        if p then 
+            sV(p, false, true)
+        else 
+            show() 
+        end
     end)
+    
     show()
-    return function(v) sV(v, true) end
+    return function(v) sV(v, true, false) end
 end
 
-local function fmtMin(v) return v <= 0 and "Any" or (utf8.char(0xE002) .. tostring(v)) end
-local function fmtMax(v) return v >= PR_MAX and "Any" or (utf8.char(0xE002) .. tostring(v)) end
+local function fmtMin(v) return v <= 0 and "Any" or tostring(v) end
+local function fmtMax(v) return v >= PR_MAX and "Any" or tostring(v) end
+
+
+
+local function fmtMin(v) return v <= 0 and "Any" or tostring(v) end
+local function fmtMax(v) return v >= PR_MAX and "Any" or tostring(v) end
 
 local sPg = mkPage()
 local sRstB = mkFBtn(sPg, "Reset Filters")
@@ -1198,28 +1240,34 @@ local function mkSl(sN, mnV, mxV, dV)
     sK.Parent = bB
     mkCr(sK, 10)
     mkSt(sK, Color3.fromRGB(0, 0, 0), 1)
+    
     local function uV(al)
-        al = math.clamp(al, 0, 1)
+        al = math.clamp(al, 0, 1) -- Visual bar stays inside bounds
         TS:Create(bF, TweenInfo.new(0.15), {Size = UDim2.new(al, 0, 1, 0)}):Play()
         TS:Create(sK, TweenInfo.new(0.15), {Position = UDim2.new(al, 0, 0.5, 0)}):Play()
     end
-    local function sV(v)
-        cfg[sN] = math.clamp(v, mnV, mxV)
+    
+    local function sV(v, skipClamp)
+        -- Dragging clamps, typing directly ignores clamp
+        cfg[sN] = skipClamp and v or math.clamp(v, mnV, mxV)
         lb.Text = string.format("%s: %.2f", sN, cfg[sN])
         ib.Text = tostring(cfg[sN])
         uV((cfg[sN] - mnV) / (mxV - mnV))
+        
         if cTr and cTr.IsPlaying then
             if sN == "Speed" then cTr:AdjustSpeed(cfg["Speed"])
             elseif sN == "Weight" then local w = cfg["Weight"]; cTr:AdjustWeight(w == 0 and 0.001 or w)
             elseif sN == "Time Position" and cTr.Length > 0 then cTr.TimePosition = math.clamp(v, 0, 1) * cTr.Length end
         end
     end
+    
     local iD = false
     local function uD(ip)
         local al = math.clamp((ip.Position.X - bB.AbsolutePosition.X) / bB.AbsoluteSize.X, 0, 1)
         local nV = math.floor((mnV + (mxV - mnV) * al) * 100) / 100
-        sV(nV)
+        sV(nV, false) -- Dragging stays clamped
     end
+    
     bB.InputBegan:Connect(function(ip)
         if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = true; uD(ip) end
     end)
@@ -1232,15 +1280,22 @@ local function mkSl(sN, mnV, mxV, dV)
     UIS.InputEnded:Connect(function(ip)
         if ip.UserInputType == Enum.UserInputType.MouseButton1 or ip.UserInputType == Enum.UserInputType.Touch then iD = false end
     end)
+    
     ib.FocusLost:Connect(function(eP)
         if eP then
             local p = tonumber(ib.Text)
-            if p then sV(p) else ib.Text = tostring(cfg[sN]) end
+            if p then 
+                sV(p, true) 
+            else 
+                ib.Text = tostring(cfg[sN]) 
+            end
         end
     end)
+    
     cfg._s[sN] = sV
     sV(cfg[sN])
 end
+
 
 local function mkTg(sN)
     cfg[sN] = cfg[sN] or false
