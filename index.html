@@ -305,7 +305,7 @@
     text-align:center;
     padding:60px 24px;
     position:relative;
-    perspective:1100px;
+    perspective:850px;
     background:radial-gradient(ellipse 72% 52% at 50% 46%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.34) 46%, rgba(0,0,0,0) 78%);
   }
 
@@ -331,13 +331,6 @@
     box-shadow:0 26px 60px rgba(0,0,0,0.55);
     transform-style:preserve-3d;
     will-change:transform;
-  }
-  .hero-panel::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:radial-gradient(420px 170px at var(--gx,50%) var(--gy,0%), rgba(255,255,255,0.09), transparent 62%);
-    pointer-events:none;
   }
   .hero-panel .quote{ margin:0; }
   .hero-panel .tagline{ margin-top:16px; }
@@ -2672,20 +2665,16 @@
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
     function frame(){
       raf = 0;
-      cx += (tx - cx) * 0.09;
-      cy += (ty - cy) * 0.09;
-      title.style.transform = `rotateY(${(cx * 9).toFixed(2)}deg) rotateX(${(-cy * 7).toFixed(2)}deg) translateZ(16px)`;
-      if(panel) panel.style.transform = `rotateY(${(cx * 6).toFixed(2)}deg) rotateX(${(-cy * 5).toFixed(2)}deg)`;
+      cx += (tx - cx) * 0.14;
+      cy += (ty - cy) * 0.14;
+      title.style.transform = `rotateY(${(cx * 15).toFixed(2)}deg) rotateX(${(-cy * 12).toFixed(2)}deg) translateZ(22px)`;
+      if(panel) panel.style.transform = `rotateY(${(cx * 10).toFixed(2)}deg) rotateX(${(-cy * 8).toFixed(2)}deg) translateZ(10px)`;
       if(Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) raf = requestAnimationFrame(frame);
     }
     hero.addEventListener('pointermove', (e) => {
       const r = hero.getBoundingClientRect();
       tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
       ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      if(panel){
-        panel.style.setProperty('--gx', ((tx + 1) / 2 * 100).toFixed(1) + '%');
-        panel.style.setProperty('--gy', ((ty + 1) / 2 * 100).toFixed(1) + '%');
-      }
       if(!raf) raf = requestAnimationFrame(frame);
     });
     hero.addEventListener('pointerleave', () => {
