@@ -3,6 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>g4zwr</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
 
@@ -316,13 +317,10 @@
     background:radial-gradient(ellipse 72% 52% at 50% 46%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.34) 46%, rgba(0,0,0,0) 78%);
   }
 
-  /* quote + tagline sit in a simple flat card, matching the other panels */
+  /* quote sits bare on the page — no box, just the text */
   .hero-panel{
     margin-top:40px;
-    padding:16px 36px 18px;
-    border:1px solid var(--line);
-    background:var(--bg-panel);
-    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    margin-bottom:56px;
   }
   .hero-panel .quote{ margin:0; }
   .hero h1{
@@ -960,8 +958,51 @@
     font-size:12.5px;
     line-height:1.6;
     color:var(--fg-dim);
-    white-space:pre-line;
+    /* the preview cut: fixed max height, hide the overflow, fade the tail */
+    max-height:170px;
+    overflow:hidden;
+    position:relative;
   }
+  .proj-readme-body.clipped::after{
+    content:'';
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:52px;
+    background:linear-gradient(rgba(0,0,0,0), var(--bg-panel));
+    pointer-events:none;
+  }
+  .proj-readme-body h1, .proj-readme-body h2, .proj-readme-body h3{
+    font-size:12.5px; font-family:var(--font-mono); color:var(--fg);
+    margin:10px 0 4px; letter-spacing:0.02em;
+  }
+  .proj-readme-body p, .proj-readme-body ul, .proj-readme-body ol{ margin:6px 0; }
+  .proj-readme-body ul, .proj-readme-body ol{ padding-left:18px; }
+  .proj-readme-body img{ max-width:100%; height:auto; display:block; margin:8px 0; }
+  .proj-readme-body a{ color:var(--fg); text-decoration:underline; }
+  .proj-readme-body code{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:1px 5px;
+  }
+  .proj-readme-body pre{
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--line);
+    padding:10px 12px;
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .proj-readme-body pre code{ background:none; border:none; padding:0; }
+  .proj-readme-body blockquote{
+    margin:6px 0; padding:2px 12px;
+    border-left:2px solid var(--line-strong);
+    color:var(--fg-dim2);
+  }
+  .proj-readme-body hr{ border:none; border-top:1px solid var(--line); margin:12px 0; }
+  .proj-readme-body table{ border-collapse:collapse; margin:8px 0; font-size:11.5px; }
+  .proj-readme-body th, .proj-readme-body td{ border:1px solid var(--line); padding:4px 8px; }
   .proj-links{ margin-top:16px; display:flex; gap:18px; }
   .proj-links a{ font-family:var(--font-mono); font-size:12.5px; color:var(--fg-dim2); }
   .proj-links a:hover{ color:var(--accent); text-decoration:none; }
@@ -1072,10 +1113,6 @@
     <section>
       <h2 class="reveal">contact me on:</h2>
       <div class="carousel reveal" id="links" data-start-index="0" tabindex="0" aria-label="contact links">
-        <a class="link-card" href="https://wa.me/qr/g4zwr" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.37c0-4.54 3.7-8.24 8.23-8.24zm-4.56 4.4c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.7 2.7 4.2 3.68 2.07.82 2.49.65 2.94.61.45-.04 1.45-.59 1.66-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28-.24-.12-1.45-.71-1.67-.8-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.96-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.35-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.34-.76-1.83-.2-.48-.4-.42-.55-.42z"/></svg>
-          WhatsApp
-        </a>
         <a class="link-card" href="https://www.roblox.com/users/10841765037" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24"><path d="M4.16 0 0 19.84 19.84 24 24 4.16 4.16 0zm7.09 8.42 4.33 1.09-1.09 4.33-4.33-1.09 1.09-4.33z"/></svg>
           Roblox
@@ -1219,7 +1256,7 @@
 
   <div class="about-section">
     <h2 class="about-h2">get in touch</h2>
-    <p>Best way to reach me is Discord or WhatsApp — full breakdown of every contact method on the <a class="route-link" href="/contact" data-route="contact">contact page</a>.</p>
+    <p>Best way to reach me is Discord — full breakdown of every contact method on the <a class="route-link" href="/contact" data-route="contact">contact page</a>.</p>
   </div>
 
   <a class="back-link" href="/" data-route="home">&larr; back home</a>
@@ -1230,13 +1267,6 @@
   <p class="about-lead">Pick whatever's easiest — here's what each one's actually good for.</p>
 
   <div class="contact-list">
-    <a class="contact-row" href="https://wa.me/qr/g4zwr" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.87 9.87 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.37c0-4.54 3.7-8.24 8.23-8.24zm-4.56 4.4c-.16 0-.42.06-.64.3-.22.24-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.7 2.7 4.2 3.68 2.07.82 2.49.65 2.94.61.45-.04 1.45-.59 1.66-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28-.24-.12-1.45-.71-1.67-.8-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.96-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.35-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.34-.76-1.83-.2-.48-.4-.42-.55-.42z"/></svg>
-      <div class="contact-row-text">
-        <span class="contact-row-name">WhatsApp</span>
-        <span class="contact-row-desc">Fastest way to reach me — collab requests, commission questions, or just to chat. I check this daily.</span>
-      </div>
-    </a>
     <a class="contact-row" href="https://discord.com/users/1296500534739734530" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.9-1.52.07.07 0 0 0-.08.04c-.21.38-.45.86-.61 1.24a18.3 18.3 0 0 0-5.48 0 12.6 12.6 0 0 0-.62-1.24.08.08 0 0 0-.08-.04c-1.7.3-3.35.81-4.9 1.52a.07.07 0 0 0-.03.03C1.07 8.87.34 13.24.7 17.55a.08.08 0 0 0 .03.06c2.06 1.52 4.06 2.44 6.02 3.05a.08.08 0 0 0 .09-.03c.46-.64.88-1.31 1.23-2.02a.08.08 0 0 0-.04-.11 13 13 0 0 1-1.87-.9.08.08 0 0 1 0-.13c.13-.09.25-.19.37-.28a.07.07 0 0 1 .08 0c3.93 1.8 8.18 1.8 12.06 0a.07.07 0 0 1 .08 0c.12.1.24.19.37.28a.08.08 0 0 1 0 .13c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.11c.36.7.78 1.37 1.23 2.02a.08.08 0 0 0 .09.03c1.97-.6 3.97-1.53 6.03-3.05a.08.08 0 0 0 .03-.06c.44-4.98-.74-9.31-3.13-13.15a.06.06 0 0 0-.03-.03zM8.68 14.9c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.95 2.42-2.15 2.42zm6.66 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.94 2.42-2.15 2.42z"/></svg>
       <div class="contact-row-text">
@@ -2649,6 +2679,25 @@
     return repo.license && repo.license.name ? repo.license.name : 'no license';
   }
 
+  // READMEs are third-party content rendered as HTML — strip every tag and
+  // attribute that could carry script, then allow nothing else through.
+  function sanitizeReadmeHTML(html){
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('script,style,iframe,object,embed,form,link,meta').forEach(el => el.remove());
+    const walk = document.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT);
+    const nodes = [];
+    while(walk.nextNode()) nodes.push(walk.currentNode);
+    nodes.forEach(el => {
+      [...el.attributes].forEach(a => {
+        const v = (a.value || '').replace(/\s+/g, '').toLowerCase();
+        const n = a.name.toLowerCase();
+        if(n.startsWith('on') || v.startsWith('javascript:') || n === 'srcset') el.removeAttribute(a.name);
+      });
+      if(el.tagName === 'A'){ el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener nofollow'); }
+    });
+    return doc.body.innerHTML;
+  }
+
   function topicsHTML(repo){
     const topics = repo.topics || [];
     if(!topics.length) return '';
@@ -2685,8 +2734,16 @@
         targetEl.textContent = 'README has no readable content.';
         return;
       }
-      const preview = clean.slice(0, 420);
-      targetEl.textContent = preview + (clean.length > 420 ? '…' : '');
+      // render the real markdown and clip it in CSS — the cut happens in the
+      // preview box, not by chopping characters out of the text
+      const html = (window.marked ? marked.parse(raw) : escapeHTML(raw));
+      targetEl.innerHTML = sanitizeReadmeHTML(html);
+      // images streaming in change the height, so re-test the clip as they land
+      const recheck = () => {
+        if(targetEl.scrollHeight > targetEl.clientHeight + 4) targetEl.classList.add('clipped');
+      };
+      requestAnimationFrame(recheck);
+      targetEl.querySelectorAll('img').forEach(i => { i.addEventListener('load', recheck); i.addEventListener('error', recheck); });
     }catch(err){
       targetEl.textContent = 'no README found for this repo.';
     }
@@ -2762,7 +2819,8 @@
       let repos = await res.json();
 
       repos = repos
-        .filter(r => !r.fork)
+        // the rewards-farmer fork stays so the projects list isn't just two
+        // cards; only the profile/meta repos are excluded
         .filter(r => !EXCLUDED_REPOS.includes(r.name.toLowerCase()))
         .sort((a,b) => (b.stargazers_count - a.stargazers_count) || (new Date(b.updated_at) - new Date(a.updated_at)));
 
