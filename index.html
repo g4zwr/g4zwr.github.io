@@ -309,17 +309,32 @@
     background:radial-gradient(ellipse 72% 52% at 50% 46%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.34) 46%, rgba(0,0,0,0) 78%);
   }
 
-  /* 3D hero: the title extrudes a few px and both it and the glass panel
+  /* 3D hero: the title is a real extrusion — stacked Z-layers behind the face
+     so rotation reveals actual side walls — and both it and the glass panel
      rotate toward the cursor (desktop). Touch devices get a slow idle float
      so the depth still reads without a pointer. */
   .hero h1{
+    transform-style:preserve-3d;
     will-change:transform;
-    text-shadow:
-      1px 1px 0 rgba(255,255,255,0.30),
-      2px 2px 0 rgba(255,255,255,0.20),
-      4px 4px 0 rgba(255,255,255,0.10),
-      7px 7px 22px rgba(0,0,0,0.65);
+    text-shadow:0 14px 34px rgba(0,0,0,0.6);
   }
+  .hero h1 .t3d-depth{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.9s ease 0.5s;
+  }
+  body.entered .hero h1 .t3d-depth{ opacity:1; }
+  .hero h1 .t3d-layer{
+    position:absolute;
+    inset:0;
+    text-align:center;
+    white-space:nowrap;
+    color:#0f0f0f;
+  }
+  .hero h1 .t3d-layer:last-child{ color:#2d2d2d; }
   .hero h1::after{ text-shadow:none; }
   .hero-panel{
     position:relative;
@@ -363,7 +378,7 @@
     pointer-events:none;
     color:transparent;
     -webkit-text-stroke:1px rgba(255,255,255,0.2);
-    transform:translate(0.028em, 0.028em);
+    transform:translate3d(0.028em, 0.028em, 0.6px);
     /* The real glyphs are .ch spans that start at opacity 0, so the stroked
        ghost is the only thing visible before entry. It has to stay hidden
        until the letters land, otherwise the blurred page shows a bare
@@ -1635,6 +1650,23 @@
   const heroText = heroTitle.textContent;
   heroTitle.setAttribute('aria-label', heroText);
   heroTitle.textContent = '';
+  // Real Z extrusion: full-text copies stacked behind the face at increasing
+  // negative depth. Rotation then shows genuine side walls instead of a baked
+  // text-shadow that ignores the tilt.
+  (function buildExtrusion(){
+    const LAYERS = 10, STEP = 1.2;   // ~12px total depth
+    const depth = document.createElement('span');
+    depth.className = 't3d-depth';
+    depth.setAttribute('aria-hidden', 'true');
+    for(let i = LAYERS; i >= 1; i--){
+      const l = document.createElement('span');
+      l.className = 't3d-layer';
+      l.style.transform = `translateZ(${(-i * STEP).toFixed(1)}px)`;
+      l.textContent = heroText;
+      depth.appendChild(l);
+    }
+    heroTitle.appendChild(depth);
+  })();
   [...heroText].forEach((c, i) => {
     const s = document.createElement('span');
     s.className = 'ch';
